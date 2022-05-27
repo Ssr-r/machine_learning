@@ -1,10 +1,7 @@
 from pickle import FALSE
 from sqlite3 import Row
-import chess
 import pygame, sys
 import _helper
-
-
 
 WIDTH = HEIGHT = 600
 DIM = 8
@@ -23,6 +20,7 @@ def load_images():
             (SQ_SIZE, SQ_SIZE)
         )
 
+
 # Main driver for input and updating
 def main():
     pygame.init()
@@ -31,13 +29,12 @@ def main():
     game_state = _helper.GameState()
     valid_moves = game_state.get_valid_moves()
     #  for i in valid_moves: print(i.get_chess_notation())
-    move_made = False # Flag var for when a move is made
+    move_made = False  # Flag var for when a move is made
 
     # load images need to called once before loop
     load_images()
-
-    selected_square = () # Inıtal empty square (row, col)
-    player_clicks = [] # Keep tracks of user clicks. [(two tuple)]
+    selected_square = ()  # Initial empty square (row, col)
+    player_clicks = []  # Keep tracks of user clicks. [(two tuple)]
     RUN_FLAG = True
     while RUN_FLAG:
         for event in pygame.event.get():
@@ -47,9 +44,9 @@ def main():
                 location = pygame.mouse.get_pos()
                 row = location[1] // SQ_SIZE
                 col = location[0] // SQ_SIZE
-                if selected_square == (row, col): # Click same square
-                    selected_square = () # Deselect
-                    player_clicks = [] # Empty clicks
+                if selected_square == (row, col):  # Click same square
+                    selected_square = ()  # Deselect
+                    player_clicks = []  # Empty clicks
                 else:
                     selected_square = (row, col)
                     player_clicks.append(selected_square)
@@ -58,16 +55,16 @@ def main():
                     for i in range(len(valid_moves)):
                         if move == valid_moves[i]:
                             game_state.make_move(valid_moves[i])
-                            print("Değiştik!")
                             move_made = True
+                            remains = game_state.get_remain_pieces()
                             #  for i in game_state.board: print(i) # for print board
-                            selected_square = () # Reset user clicks
+                            selected_square = ()  # Reset user clicks
                             player_clicks = []
                     if not move_made:
                         player_clicks = [selected_square]
             #  Key handlers
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_z: # undo last move when pressed "z"
+                if event.key == pygame.K_z:  # undo last move when pressed "z"
                     game_state.undo_move()
                     move_made = True
             if move_made:
@@ -75,6 +72,7 @@ def main():
                 move_made = False
         draw_game_state(screen, game_state)
         pygame.display.flip()
+
 
 def draw_game_state(screen, game_state):
     draw_board(screen),
@@ -86,10 +84,11 @@ def draw_board(screen):
     colors = [pygame.Color('white'), pygame.Color('gray')]
     for row in range(DIM):
         for col in range(DIM):
-            color = colors[((row+col) % 2)]
+            color = colors[((row + col) % 2)]
             pygame.draw.rect(screen, color, pygame.Rect(
                 col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE
             ))
+
 
 # Draws pi state of pieces to board
 def draw_pieces(screen, board):
@@ -98,8 +97,8 @@ def draw_pieces(screen, board):
             piece = board[row][col]
             if piece != "--":
                 screen.blit(IMAGES[piece], pygame.Rect(
-                col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE
-            ))
+                    col * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE
+                ))
 
 
 if __name__ == "__main__":
