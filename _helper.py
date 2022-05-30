@@ -1,16 +1,13 @@
-import pygame
-from pygame.locals import *
 from collections import defaultdict
-import sys
 
 
 class GameState:
     def __init__(self):
         self.board = [
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "bN", "--", "--", "bN", "--", "--"],
             ["--", "--", "--", "bp", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "wp", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "wp", "--", "--", "--", "--"],
@@ -20,38 +17,53 @@ class GameState:
 
         self.white_move = True
         self.move_log = []
-        self.remain_pieces = {}
+        self.remain_moves = {}
+        self.remain_pieces = {'w': [], 'b': []}
         self.color_map = {"w": True, "b": False}
+        self.is_finished = False
+        self.is_draw = False
 
     def make_move(self, move):
         self.board[move.start_row][move.start_col] = "--"
         self.board[move.end_row][move.end_col] = move.piece_moved
         self.move_log.append(move)
         self.white_move = not self.white_move  # swap players
-
         #  Pawn promotion
-        if move.is_promotion:
-            print("bitiş fnc call!")
-            sys.exit()
-        self.check_draw()
 
-    def check_draw(self):
-        self.get_remain_pieces()
-        opp_color = "w" if not self.white_move else "b"
-        if len(self.remain_pieces[opp_color]) == 0:
-            print("bitiş fnc call!")
-            sys.exit()
+    def check_promotion(self):
+        for row in range(len(self.board)):
+            for col in range(len(self.board[row])):
+                if row == 0 and self.board[row][col][0] == "w" or row == 7 and self.board[row][col][0] == "b":
+                    self.is_finished = True
+
+    def check_draw(self, valid_moves):
+        self.get_remain_moves(valid_moves)
+        opp_color = "w" if self.white_move else "b"
+        if len(self.remain_moves[opp_color]) == 0 and len(self.remain_pieces[opp_color]) >= 1 and not self.is_finished:
+            self.is_draw = True
+
+    def get_remain_moves(self, valid_moves):
+        if not self.is_draw and not self.is_finished:
+            self.remain_moves = {}
+            for color in self.color_map.keys():
+                remains = defaultdict(str)
+                for move in valid_moves:
+                    remains[move.get_chess_notation()] = move.get_rank()
+                _color = "w" if self.white_move else "b"
+                self.remain_moves[_color] = remains
+                self.white_move = not self.white_move
 
     def get_remain_pieces(self):
-        self.remain_pieces = {}
-        for color in self.color_map.keys():
-            remains = defaultdict(str)
-            moves = self.get_all_possible_moves()
-            for move in moves:
-                remains[move.get_chess_notation()] = move.get_rank()
-            self.remain_pieces[color] = remains
-            self.white_move = not self.white_move
-        return self.remain_pieces
+        if not self.is_draw and not self.is_finished:
+            self.remain_pieces = {'w': [], 'b': []}
+            for row in range(len(self.board)):
+                for col in range(len(self.board[row])):
+                    if self.board[row][col] != "--" and self.board[row][col][0] == "w":
+                        self.remain_pieces['w'].append(self.board[row][col])
+                    elif self.board[row][col] != "--" and self.board[row][col][0] == "b":
+                        self.remain_pieces['b'].append(self.board[row][col])
+            if len(self.remain_pieces["w"]) == 0 or len(self.remain_pieces["b"]) == 0:
+                self.is_finished = True
 
     def undo_move(self):
         if len(self.move_log) != 0:  # Make sure its not first move!
@@ -63,19 +75,6 @@ class GameState:
     def get_valid_moves(self):
         moves = self.get_all_possible_moves()
         return moves
-
-    """
-    def square_under_attack(self, row, col):
-    #  Determine if the enemy can attack to square
-        self.white_move = not self.white_move # changing point of view
-        opp_moves = self.get_all_possible_moves()
-        self.white_move = not self.white_move
-        for move in opp_moves:
-            if move.end_row == row and move.end_col == col:
-                self.white_move = not self.white_move
-                return True
-            return False
-    """
 
     def get_all_possible_moves(self):
         # All moves w/ considering checks
