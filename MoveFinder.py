@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-piece_score = {"N": 3, "p": 10}
+piece_score = {"N": 3, "p": 10000}
 DEPTH = 2
 CHECKMATE = 1000
 
@@ -51,5 +51,5 @@ def score_board(game_state):
             if square[0] == "w":
                 score += piece_score[square[1]]
             elif square[0] == "b":
-                score += piece_score[square[1]]
+                score -= piece_score[square[1]]
     return score

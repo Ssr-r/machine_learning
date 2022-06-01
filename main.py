@@ -25,7 +25,7 @@ def load_images():
 
 
 # Main driver for input and updating
-def main(round_limit=ROUND_LIMIT, train=False, player_one=True, player_two=False):
+def main(round_limit=ROUND_LIMIT, train=False, player_one=False, player_two=False):
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
@@ -167,4 +167,4 @@ def draw_pieces(screen, board):
 
 
 if __name__ == "__main__":
-    main(player_one=False, player_two=True)
+    main(player_one=False, player_two=False)
